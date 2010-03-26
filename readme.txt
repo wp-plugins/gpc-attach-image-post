@@ -16,7 +16,7 @@ The plugin has a page in administration panel located in menu block "Attach Imag
 
 == About Public Pages ==
 To add a picture for a post, the user needs to go to:
-	http://<wordpress installation url>/<post name or page name>/upload-image
+	http://wordpress-installation-url/post-name-or-page-name/upload-image
 	
 To see the list of all added images thumbnails for the current authenticated user, he/she needs to go to:
 	http://<wordpress installation url>/<post name or page name>/images
@@ -24,7 +24,7 @@ To see the list of all added images thumbnails for the current authenticated use
 The max size of thumbnail are the same values setted in administration panel under: Settings>>Media
 
 To see the list of images a member has upload, the user needs to go to:
-	http://<wordpress installation url>/members/<member login>/member-images
+	http://wordpress-installation-url/members/some-member-login/member-images
 
 == About Template Tags ==
 * The template tag GpcAttachImagePost::new_image_tag_for_post() can be used as follow to display a post thumbnails (if has any image associated) within a category/archive.
