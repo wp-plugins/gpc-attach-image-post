@@ -14,7 +14,7 @@ all the uplaoded images are display with thumbs.
 Administration Pages:
 The plugin has a page in administration panel located in menu block "Attach Image" to set Max Size for the upload images.
 
-== About Public Pages:
+== About Public Pages ==
 To add a picture for a post, the user needs to go to:
 	http://<wordpress installation url>/<post name or page name>/upload-image
 	
@@ -26,7 +26,7 @@ The max size of thumbnail are the same values setted in administration panel und
 To see the list of images a member has upload, the user needs to go to:
 	http://<wordpress installation url>/members/<member login>/member-images
 
-== About Template Tags
+== About Template Tags ==
 * The template tag GpcAttachImagePost::new_image_tag_for_post() can be used as follow to display a post thumbnails (if has any image associated) within a category/archive.
 <?php if (class_exists('GpcAttachImagePost')) GpcAttachImagePost::new_image_tag_for_post() ?>
 
