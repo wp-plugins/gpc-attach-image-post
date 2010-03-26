@@ -3,7 +3,7 @@ Contributors: leticia_larr,poolie
 Tags: attach,image,post,thumbnail
 Tested up to: 2.9
 Requires at least: 2.8.5
-Stable tag: trunk
+Stable tag: 1.0
 
 This plugin allow registered users attach an images to a posts and pages.
 
