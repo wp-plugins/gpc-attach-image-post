@@ -26,8 +26,17 @@ $images_urls = array();
 if ($post_name) {
 	$post_name = GpcAttachImagePost_Validator::parse_string($post_name);
 	
-	// Get post ID by name
-	$post_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_name = '$post_name'");
+	// Get post
+	$post = $wpdb->get_row("SELECT * FROM $wpdb->posts WHERE post_name = '$post_name'");
+	
+	// Get ID
+	$post_id = $post->ID;
+	
+	// Get post URL
+	$post_url = get_permalink($post_id);
+	
+	// Get post name
+	$post_name = $post->post_title;
 	
 	if ($post_id!=NULL) {
 		$current_logued_user = GpcAttachImagePost_Users::get_user_login();
@@ -35,9 +44,14 @@ if ($post_name) {
 		$images = GpcAttachImagePost_WpPostmeta::get_images($post_id);
 		foreach ($images as $image_item) {
 			$image_item_arr = split(GpcAttachImagePost_WpPostmeta::$values_separator,$image_item);
+			
+			// Get user data
+			$user_data = get_userdatabylogin($image_item_arr[1]);
+			
 			$images_urls[] = array('full'=>$image_item_arr[0],
 									'thumb'=>$image_item_arr[2],
 									'user_login'=>$image_item_arr[1],
+									// uncomment to use frontend profile //'profile_link'=>$user_data->user_url
 									'profile_link'=>GpcAttachImagePost::$plugin_url . '/../../../../wp-admin/profile.php?user_id=' . GpcAttachImagePost_Users::get_user_id($image_item_arr[1])
 								);
 		}

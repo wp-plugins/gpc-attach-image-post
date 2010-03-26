@@ -148,6 +148,75 @@ if (!class_exists('GpcAttachImagePost'))
 		    	return $html;			
         }
         
+        /**
+         * Handler for HTML tag to display the list if image uploaded by user
+         * 
+         * @static
+         * @global 	object		$bp			BuddyPress object
+         * @global 	object		$wpdb		WordPress object
+         * @param 	int|bool	$user_id	If false the used user is the current displayed
+         * @return 	void
+         * @access 	public
+         */
+        static function images_for_member($user_id = false) {
+        	global $bp, $wpdb;
+
+			if ( !$user_id )
+				$user_id = $bp->displayed_user->id;
+			
+			$member_login = GpcAttachImagePost_Users::get_user_login($user_id);
+			
+        	// Get member images
+			include(GpcAttachImagePost::$plugin_dir . '/includes/get_all_images.php');
+
+			// List member images
+			include(GpcAttachImagePost::$plugin_dir . '/templates/includes/member_images.php');
+        }
+        
+        /**
+         * Handler for HTML tag to display the total number of image-uploads a user made.
+         *  
+         * @static
+         * @global 	object		$bp			BuddyPress object
+         * @global 	object		$wpdb		WordPress object
+         * @param 	int|bool	$user_id	If false the used user is the current displayed
+         * @return 	void
+         * @access 	public
+         */
+        static function images_total_for_member($user_id = false) {
+        	global $bp, $wpdb;
+
+			if ( !$user_id )
+				$user_id = $bp->displayed_user->id;
+			
+			$current_user = GpcAttachImagePost_Users::get_user_login($user_id);
+			
+        	// Get All post IDs and then the count of images of User, from all blogs
+			$current_user_images_count = 0;
+			$blogs = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->base_prefix}blogs") );
+			foreach ($blogs as $blog) {
+				$tmp_blog_id = $blog->blog_id;
+				switch_to_blog($tmp_blog_id);
+				
+				$tmp_all_posts = $wpdb->get_results( $wpdb->prepare("SELECT ID FROM {$wpdb->base_prefix}{$tmp_blog_id}_posts") );
+				foreach ($tmp_all_posts as $tmp_post) {
+					$tmp_post_id = $tmp_post->ID;
+					$images = GpcAttachImagePost_WpPostmeta::get_images($tmp_post_id);
+					
+					foreach ($images as $image_item) {
+					$image_item_arr = split(GpcAttachImagePost_WpPostmeta::$values_separator,$image_item);
+					$tmp_user = $image_item_arr[1];
+					if ($tmp_user==$current_user)
+						$current_user_images_count++;
+					}
+				}
+				restore_current_blog();
+			}
+
+			// Print the number
+			echo $current_user_images_count;
+        }
+        
 		/**
          * Function to Rewrite Rules Array
          * 
@@ -161,10 +230,32 @@ if (!class_exists('GpcAttachImagePost'))
 			// <anything> / <post or page name> / upload-image
 			$newrules['.*/upload-image$'] = 'index.php?showupload-image=1';
 			$newrules['.*/images$'] = 'images.php?showimages=1';
+
+			// <anything> / <member login> / member-images
+			$newrules['.*/member-images$'] = 'index.php?showmember-images=1';
 			
 			$newrules = array_merge($newrules,$rules);
+			
+			add_filter('wp_redirect', array(&$this, 'filter_wp_redirect'), 1, 2);
+			
 			return $newrules;
 		}
+		
+		/**
+		 * Filter for redirect function
+		 *
+		 * @param 	string 		$location
+		 * @param 	int	 		$status
+		 * @return 	string|bool
+		 */
+		static function filter_wp_redirect($location, $status) {
+			if ($location==get_bloginfo('url') && $status==302) {
+				return FALSE;
+			}
+			
+			return $location;
+		}
+		
 
 		/**
          * Function to add vars for Rewrite Rules Array
@@ -175,6 +266,7 @@ if (!class_exists('GpcAttachImagePost'))
 		function handle_query_vars ( $vars ) {
 			$vars[] = "showupload-image";
 			$vars[] = "showimages";
+			$vars[] = "showmember-images";
 			return $vars;
 		}
 
@@ -192,6 +284,9 @@ if (!class_exists('GpcAttachImagePost'))
 			elseif (get_query_var("showimages")) {
 				return GpcAttachImagePost::$plugin_dir . '/pages/public/list_images.php';
 			}
+			elseif (get_query_var("showmember-images")) {
+				return GpcAttachImagePost::$plugin_dir . '/pages/public/list_member_images.php';
+			}
 			else
 				return $template_dir;
 		}
@@ -199,7 +294,6 @@ if (!class_exists('GpcAttachImagePost'))
 		/**
          * Function to flush the rewrite rules
          * 
-         * @param 	string	$template_dir	current home template
          * @return 	void
          * @access 	public
          */
@@ -212,5 +306,4 @@ if (!class_exists('GpcAttachImagePost'))
 
 // create new instance of the class
 $GpcAttachImagePost = new GpcAttachImagePost();
-
 ?>
